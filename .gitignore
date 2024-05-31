@@ -1,0 +1,13 @@
+/*
+__pycache__
+!.gitignore
+!.github */
+!/asapi
+!/tests
+!.pre-commit-config.yaml
+!example.py
+!original.py
+!Makefile
+!poetry.lock
+!pyproject.toml
+!README.md

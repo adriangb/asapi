@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "asapi"
+version = "0.1.2"
+description = "Thin wrapper around FastAPI"
+authors = ["Adrian Garcia Badaracco <1755071+adriangb@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "^0.111.0"
+anyio = "^4.3.0"
+typing-extensions = "^4.12.0"
+uvicorn = "^0.30.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"
+psycopg = {extras = ["binary", "pool"], version = "^3.1.19"}
+coverage = "^7.5.3"
+ruff = "^0.4.6"
+pyright = "^1.1.365"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+include = ["asapi", "tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "\\.\\.\\.",
+    "pass",
+]
