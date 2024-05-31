@@ -1,7 +1,7 @@
 /*
 __pycache__
 !.gitignore
-!.github */
+!/.github/
 !/asapi
 !/tests
 !.pre-commit-config.yaml
