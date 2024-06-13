@@ -12,7 +12,7 @@ async def serve(app: FastAPI, port: int) -> None:  # pragma: no cover
     """Serve an ASGI application."""
     validate_injections(app)
 
-    config = uvicorn.Config(app, port=port, host="0.0.0.0")
+    config = uvicorn.Config(app, port=port, host="0.0.0.0", log_config=None)
     server = uvicorn.Server(config=config)
 
     async with handle_signals() as stop:
