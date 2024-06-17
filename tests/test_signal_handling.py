@@ -43,4 +43,4 @@ async def test_serve_stop_sigint() -> None:
     os.kill(pid, signal.SIGINT)
     with anyio.fail_after(1):
         process.join()
-    assert q.get() == "stop"
+        assert q.get() == "stop"
