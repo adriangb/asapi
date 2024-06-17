@@ -62,16 +62,6 @@ jobs:
         uses: snok/install-poetry@v1
       - name: Test
         run: make test
-      - name: Export Coverage Report
-        run: |
-          poetry run pip install "coverage[toml]"
-          poetry run coverage html
-        # upload html coverage report as github artifact
-      - name: Upload Coverage Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: htmlcov
 
   version-check:
     name: Check Version Bump
