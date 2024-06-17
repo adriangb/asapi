@@ -15,7 +15,7 @@ SIGNAL_HANDLERS: WeakKeyDictionary[asyncio.AbstractEventLoop, anyio.Event] = (
 )
 
 
-async def _signal_handler(stop: anyio.Event) -> None:  # pragma: no cover
+async def _signal_handler(stop: anyio.Event) -> None:
     with anyio.open_signal_receiver(signal.SIGTERM, signal.SIGINT) as signals:
         async for _ in signals:
             logger.info("Received shutdown signal")
@@ -24,7 +24,7 @@ async def _signal_handler(stop: anyio.Event) -> None:  # pragma: no cover
 
 
 @asynccontextmanager
-async def handle_signals() -> AsyncIterator[anyio.Event]:  # pragma: no cover
+async def handle_signals() -> AsyncIterator[anyio.Event]:
     """Handle SIGTERM and SIGINT signals.
 
     This context manager provides an anyio Event that gets set when a signal is received and we are shutting down.
