@@ -65,7 +65,10 @@ jobs:
       - name: Install and configure Poetry
         uses: snok/install-poetry@v1
       - name: Test
-        run: make test
+        run: |
+          poetry install
+          poetry run coverage run -m pytest -v tests
+          poetry run coverage xml
 
   version-check:
     name: Check Version Bump
