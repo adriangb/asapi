@@ -27,7 +27,7 @@ init: .clean .init
 	@echo ---- 🔧 Re-initialized project ----
 
 lint: .init
-	pre-commit run --all-files
+	poetry run pre-commit run --all-files
 
 test: .init
 	@echo ---- ⏳ Running tests ----
