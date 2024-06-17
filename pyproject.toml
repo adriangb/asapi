@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "asapi"
-version = "0.1.3"
+version = "0.1.4"
 description = "Thin wrapper around FastAPI"
 authors = ["Adrian Garcia Badaracco <1755071+adriangb@users.noreply.github.com>"]
 readme = "README.md"
