@@ -19,4 +19,5 @@ async def serve(app: FastAPI, port: int) -> None:  # pragma: no cover
         async with anyio.create_task_group() as tg:
             tg.start_soon(server.serve)
             await stop.wait()
-            await server.shutdown()
+            if server.started:
+                await server.shutdown()
