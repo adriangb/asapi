@@ -6,6 +6,7 @@ import signal
 import socket
 
 import anyio
+import anyio.to_thread
 import pytest
 from asapi import serve
 from fastapi import FastAPI
@@ -42,5 +43,7 @@ async def test_serve_stop_sigint() -> None:
     assert pid is not None
     os.kill(pid, signal.SIGINT)
     with anyio.fail_after(1):
-        process.join()
-        assert q.get() == "stop"
+        await anyio.to_thread.run_sync(process.join)
+        assert process.exitcode == 0
+        r = await anyio.to_thread.run_sync(q.get)
+        assert r == "stop"
