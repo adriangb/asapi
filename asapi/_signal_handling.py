@@ -37,9 +37,11 @@ async def handle_signals() -> AsyncIterator[anyio.Event]:
     except RuntimeError:
         # we're not in an asyncio event loop
         loop = None
-    if loop and loop in SIGNAL_HANDLERS:
-        yield SIGNAL_HANDLERS[loop]
-        return
+    if loop:
+        handler = SIGNAL_HANDLERS.get(loop, None)
+        if handler is not None:
+            yield handler
+            return
     stop = anyio.Event()
     if loop:
         SIGNAL_HANDLERS[loop] = stop

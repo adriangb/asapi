@@ -104,6 +104,6 @@ def bind(app: FastAPI, dep_type: Injected[_T], dep: _T) -> None: ...
 def bind(app: FastAPI, dep_type: Any, dep: Any) -> None: ...
 
 
-def bind(app: FastAPI, dep_type: type[_T], dep: _T) -> None:
+def bind(app: FastAPI, dep_type: Any, dep: Any) -> None:
     """Bind a dependency to the app for use in FastAPI's dependency injection system."""
     app.dependency_overrides[dep_type] = wrap_dep_in_async_closure(dep)

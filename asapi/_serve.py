@@ -1,16 +1,29 @@
 from __future__ import annotations
 
 import anyio
-import uvicorn
 from fastapi import FastAPI
+import uvicorn
+from starlette.types import ASGIApp
 
 from asapi._injected import validate_injections
 from asapi._signal_handling import handle_signals
 
 
-async def serve(app: FastAPI, port: int) -> None:  # pragma: no cover
+def _validate_injections(app: ASGIApp) -> None:
+    """Try to find the FastAPI app, possibly wrapped in middleware, and validate its dependencies."""
+    if isinstance(app, FastAPI):
+        validate_injections(app)
+    else:
+        # having the original app under `.app` is a common pattern in middleware
+        # but not a standard, so we need to fail gracefully
+        maybe_app = getattr(app, "app", None)
+        if maybe_app is not None:
+            validate_injections(maybe_app)
+
+
+async def serve(app: ASGIApp, port: int) -> None:  # pragma: no cover
     """Serve an ASGI application."""
-    validate_injections(app)
+    _validate_injections(app)
 
     config = uvicorn.Config(app, port=port, host="0.0.0.0", log_config=None)
     server = uvicorn.Server(config=config)
