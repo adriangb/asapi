@@ -129,7 +129,7 @@ jobs:
       - name: Install uv and set the python version
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: 3.x
+          python-version: "3.13"
           enable-cache: true
       - name: Build and publish
         continue-on-error: true  # allow pushes to main that don't release
