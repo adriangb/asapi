@@ -17,6 +17,8 @@ Endpoints then use `Injected[DependencyType]` to get access to the dependencies 
 ## Example
 
 ```python
+from __future__ import annotations
+
 import anyio
 from fastapi import FastAPI
 from psycopg_pool import AsyncConnectionPool
@@ -54,6 +56,8 @@ But using `uvicorn app:app` from the command line has several issues:
 `asapi` solves this by providing a `serve` function that you can use to run your application in your own event loop.
 
 ```python
+from __future__ import annotations
+
 import anyio
 from asapi import serve
 from fastapi import FastAPI
@@ -73,19 +77,23 @@ if __name__ == "__main__":
 ```
 
 Now you have full control of the event loop and can make database connections, run background tasks, etc.
-Combined with the explicit composition root, you can initialize all your resources in one place:
+Combined with the explicit composition root, you can initialize all your resources in one place, bind them to an application instance that is specific to this event loop and inject them into the endpoints that need them, all without global state or multiple layers of `Depends`.
 
 ```python
+from __future__ import annotations
+
+import logging
+from typing import Any
 import anyio
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from psycopg_pool import AsyncConnectionPool
 from asapi import FromPath, Injected, serve, bind
 
 
-app = FastAPI()
+router = APIRouter()
 
 
-@app.get("/hello/{name}")
+@router.get("/hello/{name}")
 async def hello(name: FromPath[str], pool: Injected[AsyncConnectionPool]) -> str:
     async with pool.connection() as conn:
         async with conn.cursor() as cur:
@@ -95,12 +103,21 @@ async def hello(name: FromPath[str], pool: Injected[AsyncConnectionPool]) -> str
             return res[0]
 
 
+def create_app(pool: AsyncConnectionPool[Any]) -> FastAPI:
+    app = FastAPI()
+    bind(app, AsyncConnectionPool, pool)
+    app.include_router(router)
+    return app
+
+
 async def main() -> None:
+    logging.basicConfig(level=logging.INFO)
+
     async with AsyncConnectionPool(
-        "postgres://postgres:postgres@localhost:5432/postgres"
+        "postgres://postgres:postgres@localhost:54320/postgres"
     ) as pool:
-        bind(app, AsyncConnectionPool, pool)
-        await serve(app, 8000)
+        app = create_app(pool)
+        await serve(app, 9000)
 
 
 if __name__ == "__main__":

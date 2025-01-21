@@ -105,5 +105,9 @@ def bind(app: FastAPI, dep_type: Any, dep: Any) -> None: ...
 
 
 def bind(app: FastAPI, dep_type: Any, dep: Any) -> None:
-    """Bind a dependency to the app for use in FastAPI's dependency injection system."""
+    """Bind a dependency to the app for use in FastAPI's dependency injection system.
+
+    This modifies `app` in place, so you should not use it on a global application that is initialized
+    more than once in a process.
+    """
     app.dependency_overrides[dep_type] = wrap_dep_in_async_closure(dep)
