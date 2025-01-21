@@ -92,16 +92,20 @@ jobs:
         with:
           ref: main
           path: main
-      - name: Install uv
-        run: pip install uv
+      - uses: actions/checkout@v4
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+          enable-cache: true
       - name: Check version bump
         run: |
           cd $GITHUB_WORKSPACE/current
           NEW_VERSION=$(python setup.py --version)
           cd $GITHUB_WORKSPACE/main
           OLD_VERSION=$(python setup.py --version)
-          python -c "from packaging import version;assert version.parse(\"${NEW_VERSION}\") > version.parse(\"${OLD_VERSION}\"), \"❌ Bad version bump detected: you must bump the version in setup.py\""
-          python -c "print(\"✅ Version will be bumped from ${OLD_VERSION} to ${NEW_VERSION}\")"
+          uv run python -c "from packaging import version;assert version.parse(\"${NEW_VERSION}\") > version.parse(\"${OLD_VERSION}\"), \"❌ Bad version bump detected: you must bump the version in setup.py\""
+          uv run python -c "print(\"✅ Version will be bumped from ${OLD_VERSION} to ${NEW_VERSION}\")"
 
   # https://github.com/marketplace/actions/alls-green#why used for branch protection checks
   check:
