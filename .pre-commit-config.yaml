@@ -29,7 +29,7 @@ repos:
         pass_filenames: false
       - id: lockfile
         name: lockfile
-        entry: uv lock --locked
+        entry: uv lock
         language: system
         pass_filenames: false
         files: "pyproject.toml|uv.lock"
