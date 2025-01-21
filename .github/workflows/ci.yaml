@@ -137,6 +137,7 @@ jobs:
           PACKAGE_VERSION=$(grep -m 1 version pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
           echo "package_version=$PACKAGE_VERSION" >> $GITHUB_ENV
           printf "\nSee this release on GitHub: [v$PACKAGE_VERSION](https://github.com/$GITHUB_REPOSITORY/releases/tag/$PACKAGE_VERSION)\n" >> README.md
+          uv build
           uv publish
       - name: 🚀 Create GitHub Release 😺
         uses: ncipollo/release-action@v1
