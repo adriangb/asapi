@@ -124,7 +124,8 @@ jobs:
     name: 🚀 PyPi Release 📦
     runs-on: ubuntu-latest
     permissions:
-      id-token: 'write'
+      id-token: write
+      contents: write
     # needs: ["check"]
     steps:
       - uses: actions/checkout@v4
