@@ -8,7 +8,6 @@ __pycache__
 !example.py
 !original.py
 !Makefile
-!poetry.lock
 !pyproject.toml
 !README.md
 !uv.lock
