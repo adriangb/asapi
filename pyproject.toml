@@ -21,6 +21,7 @@ dev = [
     "pyright>=1.1.365,<2",
     "trio>=0.25.1,<0.26",
     "pre-commit>=3.7.1,<4",
+    "httpx>=0.28.1",
 ]
 
 [build-system]
