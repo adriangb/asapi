@@ -53,10 +53,12 @@ jobs:
             os: ubuntu-latest
           - python: "3.12"
             os: ubuntu-latest
+          - python: "3.13"
+            os: ubuntu-latest
           # test OSs
-          - python: "3.x"
+          - python: "3.13"
             os: macos-latest
-          - python: "3.x"
+          - python: "3.13"
             os: windows-latest
     defaults:
       run:
