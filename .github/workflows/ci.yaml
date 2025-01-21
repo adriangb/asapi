@@ -134,6 +134,7 @@ jobs:
           python-version: "3.13"
           enable-cache: true
       - name: Build and publish
+        id: pypi
         continue-on-error: true  # allow pushes to main that don't release
         run: |
           PACKAGE_VERSION=$(grep -m 1 version pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
