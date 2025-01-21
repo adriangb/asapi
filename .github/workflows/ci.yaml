@@ -116,11 +116,11 @@ jobs:
       - name: Decide whether the needed jobs succeeded or failed
         uses: re-actors/alls-green@release/v1
         with:
-          allowed-skips: version-check
+          allowed-skips: ${{ github.ref == 'refs/heads/main' && 'version-check' }}
           jobs: ${{ toJSON(needs) }}
 
   pypi:
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     name: 🚀 PyPi Release 📦
     runs-on: ubuntu-latest
     needs: ["check"]
