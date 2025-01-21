@@ -120,10 +120,10 @@ jobs:
           jobs: ${{ toJSON(needs) }}
 
   pypi:
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     name: 🚀 PyPi Release 📦
     runs-on: ubuntu-latest
-    # needs: ["check"]
+    needs: ["check"]
     steps:
       - uses: actions/checkout@v4
       - name: Install uv and set the python version
@@ -134,7 +134,7 @@ jobs:
       - name: Build and publish
         continue-on-error: true  # allow pushes to main that don't release
         run: |
-          PACKAGE_VERSION=$(python setup.py --version)
+          PACKAGE_VERSION=$(grep -m 1 version pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
           echo "package_version=$PACKAGE_VERSION" >> $GITHUB_ENV
           printf "\nSee this release on GitHub: [v$PACKAGE_VERSION](https://github.com/$GITHUB_REPOSITORY/releases/tag/$PACKAGE_VERSION)\n" >> README.md
           uv publish
