@@ -19,19 +19,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python: ["3.9", "3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install uv
-        run: |
-          pip install uv
-      - name: Install dependencies
-        run: |
-          uv pip install -r requirements.txt
+          python-version: ${{ matrix.python }}
+      - uses: actions/checkout@v4
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+      - name: Install the project
+        run: uv sync --all-extras --dev
       - name: Lint
         run: make lint
 
@@ -43,8 +45,6 @@ jobs:
       matrix:
         include:
           # test python versions
-          - python: "3.8"
-            os: ubuntu-latest
           - python: "3.9"
             os: ubuntu-latest
           - python: "3.10"
@@ -63,21 +63,17 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python }}
-      - name: Install uv
-        run: |
-          pip install uv
-      - name: Install dependencies
-        run: |
-          uv pip install -r requirements.txt
-          uv pip install pytest coverage
+          enable-cache: true
+      - name: Install the project
+        run: uv sync --all-extras --dev
       - name: Test
         run: |
-          coverage run -m pytest -v tests
-          coverage xml
+          uv run coverage run -m pytest -v tests
+          uv run coverage xml
 
   version-check:
     name: Check Version Bump
@@ -124,23 +120,18 @@ jobs:
     needs: ["check"]
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-      - name: Install uv and build tools
-        run: |
-          pip install uv build twine
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: 3.x
+          enable-cache: true
       - name: Build and publish
         continue-on-error: true  # allow pushes to main that don't release
-        id: pypi
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         run: |
           PACKAGE_VERSION=$(python setup.py --version)
           echo "package_version=$PACKAGE_VERSION" >> $GITHUB_ENV
           printf "\nSee this release on GitHub: [v$PACKAGE_VERSION](https://github.com/$GITHUB_REPOSITORY/releases/tag/$PACKAGE_VERSION)\n" >> README.md
-          python -m build
-          twine upload dist/*
+          uv publish
       - name: 🚀 Create GitHub Release 😺
         uses: ncipollo/release-action@v1
         if: steps.pypi.outcome == 'success'

@@ -1,36 +1,32 @@
-.PHONY: install-poetry .clean test test-mutation docs-build docs-serve
+.PHONY: install-uv .clean test test-mutation docs-build docs-serve
 
-GIT_SHA = $(shell git rev-parse --short HEAD)
-PACKAGE_VERSION = $(shell poetry version -s | cut -d+ -f1)
-
-.install-poetry:
+.install-uv:
 	@echo "---- 👷 Installing build dependencies ----"
-	deactivate > /dev/null 2>&1 || true
-	poetry -V || pipx install poetry
-	touch .install-poetry
+	uv -V || pip install uv
+	touch .install-uv
 
-install-poetry: .install-poetry
+install-uv: .install-uv
 
-.init: .install-poetry
+.init: .install-uv
 	@echo "---- 📦 Building package ----"
 	rm -rf .venv
-	poetry install
+	uv sync --all-extras --dev
 	git init .
-	poetry run pre-commit install --install-hooks
+	uv run pre-commit install --install-hooks
 	touch .init
 
 .clean:
 	rm -rf .init .pytest_cache
-	poetry -V || rm -rf .install-poetry
+	uv -V || rm -rf .install-uv
 
 init: .clean .init
 	@echo ---- 🔧 Re-initialized project ----
 
 lint: .init
-	poetry run pre-commit run --all-files
+	uv run pre-commit run --all-files
 
 test: .init
 	@echo ---- ⏳ Running tests ----
-	@(poetry run coverage run -m pytest tests/ && echo "---- ✅ Tests passed ----" && exit 0 || echo "---- ❌ Tests failed ----" && exit 1)
-	@(poetry run coverage report)
-	@(poetry run coverage html)
+	@(uv run coverage run -m pytest tests/ && echo "---- ✅ Tests passed ----" && exit 0 || echo "---- ❌ Tests failed ----" && exit 1)
+	@(uv run coverage report)
+	@(uv run coverage html)
