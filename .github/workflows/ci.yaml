@@ -123,6 +123,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     name: 🚀 PyPi Release 📦
     runs-on: ubuntu-latest
+    permissions:
+      id-token: 'write'
     # needs: ["check"]
     steps:
       - uses: actions/checkout@v4
