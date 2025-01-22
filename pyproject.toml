@@ -1,6 +1,6 @@
 [project]
 name = "asapi"
-version = "0.6.0"
+version = "0.6.1"
 description = "Thin wrapper around FastAPI"
 authors = [{ name = "Adrian Garcia Badaracco", email = "1755071+adriangb@users.noreply.github.com" }]
 requires-python = "~=3.9"
