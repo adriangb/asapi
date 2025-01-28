@@ -79,7 +79,7 @@ jobs:
 
   version-check:
     name: Check Version Bump
-    if: github.ref != 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     defaults:
       run:
