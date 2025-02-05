@@ -37,26 +37,6 @@ jobs:
       - name: Lint
         run: make lint
 
-  debug:
-    name: Debug
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install uv and set the python version
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: ${{ matrix.python }}
-          enable-cache: true
-      - name: Install the project
-        run: uv sync --all-extras --dev
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
-
   test:
     name: Run Tests
     runs-on: ${{ matrix.os }}
@@ -96,6 +76,9 @@ jobs:
         run: |
           uv run coverage run -m pytest -v tests
           uv run coverage xml
+      - name: Test signal handling
+        run: |
+          scripts/run_example.py
 
   version-check:
     name: Check Version Bump

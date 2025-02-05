@@ -1,26 +1,24 @@
-import asyncio
+from __future__ import annotations
+
 import signal
+import types
+from asyncio import CancelledError
 from contextlib import asynccontextmanager
-from logging import getLogger
-from typing import AsyncIterator
-from weakref import WeakKeyDictionary
+from dataclasses import dataclass
+from typing import Any, AsyncIterator, Callable
 
 import anyio
 
-logger = getLogger(__name__)
 
+@dataclass
+class SignalHandler:
+    stop: anyio.Event
+    previous: Callable[[int, types.FrameType | None], Any] | None
 
-SIGNAL_HANDLERS: WeakKeyDictionary[asyncio.AbstractEventLoop, anyio.Event] = (
-    WeakKeyDictionary()
-)
-
-
-async def _signal_handler(stop: anyio.Event) -> None:
-    with anyio.open_signal_receiver(signal.SIGTERM, signal.SIGINT) as signals:
-        async for _ in signals:
-            logger.info("Received shutdown signal")
-            stop.set()
-            return
+    def handle(self, signum: int, frame: types.FrameType | None) -> None:
+        self.stop.set()
+        if self.previous is not None:
+            self.previous(signum, frame)
 
 
 @asynccontextmanager
@@ -29,24 +27,26 @@ async def handle_signals() -> AsyncIterator[anyio.Event]:
 
     This context manager provides an anyio Event that gets set when a signal is received and we are shutting down.
     """
-    # asyncio only allows one signal handler per event loop, so we need to
-    # check if we're in an asyncio event loop and if so, reuse the existing
-    # stop event
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        # we're not in an asyncio event loop
-        loop = None
-    if loop:
-        handler = SIGNAL_HANDLERS.get(loop, None)
-        if handler is not None:
-            yield handler
-            return
     stop = anyio.Event()
-    if loop:
-        SIGNAL_HANDLERS[loop] = stop
-    async with anyio.create_task_group() as tg:
-        tg.start_soon(_signal_handler, stop)
+    sigterm_handler = SignalHandler(stop, None)
+    previous_sigterm_handler = signal.signal(signal.SIGTERM, sigterm_handler.handle)
+    if previous_sigterm_handler is not None and not isinstance(
+        previous_sigterm_handler, int
+    ):
+        sigterm_handler.previous = previous_sigterm_handler
+    sigint_handler = SignalHandler(stop, None)
+    previous_sigint_handler = signal.signal(signal.SIGINT, sigint_handler.handle)
+    if previous_sigint_handler is not None and not isinstance(
+        previous_sigint_handler, int
+    ):
+        sigint_handler.previous = previous_sigint_handler
+    try:
         yield stop
-    if loop:
-        SIGNAL_HANDLERS.pop(loop, None)
+    except (KeyboardInterrupt, CancelledError):
+        pass
+    finally:
+        stop.set()
+        if sigterm_handler.previous is not None:
+            signal.signal(signal.SIGTERM, sigterm_handler.previous)
+        if sigint_handler.previous is not None:
+            signal.signal(signal.SIGINT, sigint_handler.previous)
