@@ -12,6 +12,9 @@ from typing_extensions import TypedDict
 
 from asapi import FromPath, Injected, bind, serve
 
+
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
 
 
@@ -33,17 +36,22 @@ def create_app(client: AsyncClient) -> FastAPI:
     return app
 
 
+app = create_app(AsyncClient())
+
+
 async def main() -> None:
     logging.basicConfig(level=logging.INFO)
 
-    print("Starting server")
+    logger.info("Starting server")
 
     async with AsyncClient() as client:
         app = create_app(client)
         await serve(app, int(sys.argv[1] if len(sys.argv) > 1 else 8000))
-        print("Shutdown initiated")
+        logger.info("Shutdown initiated")
 
-    print("Shutdown complete")
+    logger.info("Shutdown complete")
+
+    logging.shutdown()
 
 
 if __name__ == "__main__":
