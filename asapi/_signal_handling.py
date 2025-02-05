@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import signal
+import sys
 import types
 from asyncio import CancelledError
 from contextlib import asynccontextmanager
@@ -34,12 +35,16 @@ async def handle_signals() -> AsyncIterator[anyio.Event]:
         previous_sigterm_handler, int
     ):
         sigterm_handler.previous = previous_sigterm_handler
-    sigint_handler = SignalHandler(stop, None)
-    previous_sigint_handler = signal.signal(signal.SIGINT, sigint_handler.handle)
-    if previous_sigint_handler is not None and not isinstance(
-        previous_sigint_handler, int
-    ):
-        sigint_handler.previous = previous_sigint_handler
+    if sys.platform != "win32":
+        # Windows doesn't support SIGINT
+        sigint_handler = SignalHandler(stop, None)
+        previous_sigint_handler = signal.signal(signal.SIGINT, sigint_handler.handle)
+        if previous_sigint_handler is not None and not isinstance(
+            previous_sigint_handler, int
+        ):
+            sigint_handler.previous = previous_sigint_handler
+    else:
+        sigint_handler = None
     try:
         yield stop
     except (KeyboardInterrupt, CancelledError):
@@ -48,5 +53,5 @@ async def handle_signals() -> AsyncIterator[anyio.Event]:
         stop.set()
         if sigterm_handler.previous is not None:
             signal.signal(signal.SIGTERM, sigterm_handler.previous)
-        if sigint_handler.previous is not None:
+        if sigint_handler is not None and sigint_handler.previous is not None:
             signal.signal(signal.SIGINT, sigint_handler.previous)
