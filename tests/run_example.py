@@ -22,16 +22,32 @@ def main() -> None:
     # Wait for server to start
     time.sleep(5)
 
-    # Send request to the server using httpx
-    with httpx.Client() as client:
-        response = client.get("http://localhost:1011/echo/test")
-        response.raise_for_status()
+    try:
+        # Send request to the server using httpx
+        with httpx.Client() as client:
+            response = client.get("http://localhost:1011/echo/test")
+            response.raise_for_status()
 
-        # Check response
-        expected_response = {"name": "test"}
-        if response.json() != expected_response:
-            print(f"Response was not as expected: {response.text}")
-            server_process.terminate()
+            # Check response
+            expected_response = {"name": "test"}
+            if response.json() != expected_response:
+                print(f"Response was not as expected: {response.text}")
+                server_process.terminate()
+                sys.exit(1)
+    except Exception as e:
+        print(f"Error occurred during request: {e}")
+        server_process.terminate()
+        # get stdout and stderr
+        try:
+            stdout, stderr = server_process.communicate(timeout=5)
+            return_code = server_process.returncode
+            print(f"stdout: {stdout}")
+            print(f"stderr: {stderr}")
+            print(f"return code: {return_code}")
+        except subprocess.TimeoutExpired:
+            print("Server failed to shut down within timeout period")
+            server_process.kill()
+        finally:
             sys.exit(1)
 
     print("Response validation successful")
