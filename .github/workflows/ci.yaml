@@ -39,7 +39,7 @@ jobs:
 
   debug:
     name: Debug
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     strategy:
       fail-fast: false
     defaults:
