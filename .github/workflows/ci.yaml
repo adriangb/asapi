@@ -76,6 +76,9 @@ jobs:
         run: |
           uv run coverage run -m pytest -v tests
           uv run coverage xml
+      - name: Test signal handling
+        run: |
+          tests/run_example.py
 
   version-check:
     name: Check Version Bump

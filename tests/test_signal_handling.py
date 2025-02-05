@@ -48,6 +48,7 @@ async def wait_for_server(port: int) -> None:
                 pass
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Unix only")
 @pytest.mark.anyio
 async def test_serve_stop_sigint() -> None:
     port = get_random_port()
@@ -68,6 +69,34 @@ async def test_serve_stop_sigint() -> None:
             await wait_for_server(port)
 
         process.send_signal(signal.SIGINT)
+        with anyio.fail_after(5):
+            code = await process.wait()
+            assert code == 0
+
+        with open(file) as f:
+            assert f.read().split("\n") == ["start", "stop"]
+
+
+@pytest.mark.anyio
+async def test_serve_stop_sigterm() -> None:
+    port = get_random_port()
+
+    async with AsyncExitStack() as stack:
+        td = stack.enter_context(TemporaryDirectory())
+
+        file = os.path.join(td, "log.txt")
+        program = str((Path(__file__).parent / "run_server.py").resolve().absolute())
+        command = [sys.executable, program, file, str(port)]
+
+        process = await stack.enter_async_context(
+            await anyio.open_process(command, start_new_session=True)
+        )
+        await stack.enter_async_context(cleanup_process(process))
+        # wait for the server to start
+        with anyio.fail_after(5):
+            await wait_for_server(port)
+
+        process.send_signal(signal.SIGTERM)
         with anyio.fail_after(5):
             code = await process.wait()
             assert code == 0
