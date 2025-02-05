@@ -60,16 +60,17 @@ def main() -> None:
         # Wait for process to complete and capture output
         stdout, stderr = server_process.communicate(timeout=5)
         return_code = server_process.returncode
+        output = stdout + stderr
 
     except subprocess.TimeoutExpired:
         print("Server failed to shut down within timeout period")
         server_process.kill()
         sys.exit(1)
 
-    # Check for required messages in stdout
+    # Check for required messages in output
     required_messages = ["Starting server", "Shutdown initiated", "Shutdown complete"]
 
-    missing_messages = [msg for msg in required_messages if msg not in stdout]
+    missing_messages = [msg for msg in required_messages if msg not in output]
 
     if missing_messages:
         print("Missing required messages in stdout:")
