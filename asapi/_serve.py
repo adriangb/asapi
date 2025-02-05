@@ -1,5 +1,7 @@
 from __future__ import annotations
+from contextlib import ExitStack
 import signal
+import sys
 
 import anyio
 from fastapi import FastAPI
@@ -31,6 +33,10 @@ async def serve(app: ASGIApp, port: int) -> None:  # pragma: no cover
     # Note: we don't actually use `anyio`'s signal handling here
     # We only want to override the default behavior of the event loop
     # which is to raise a `CancelledError` on SIGINT/SIGTERM
-    with anyio.open_signal_receiver(signal.SIGINT, signal.SIGTERM):
+    with ExitStack() as stack:
+        if sys.platform != "win32":
+            stack.enter_context(
+                anyio.open_signal_receiver(signal.SIGINT, signal.SIGTERM)
+            )
         with server.capture_signals():
             await server.serve()
