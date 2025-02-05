@@ -30,10 +30,11 @@ async def serve(app: ASGIApp, port: int) -> None:  # pragma: no cover
     config = uvicorn.Config(app, port=port, host="0.0.0.0", log_config=None)
     server = uvicorn.Server(config=config)
 
-    # Note: we don't actually use `anyio`'s signal handling here
-    # We only want to override the default behavior of the event loop
-    # which is to raise a `CancelledError` on SIGINT/SIGTERM
     with ExitStack() as stack:
+        # Note: we don't actually use `anyio`'s signal handling here
+        # We only want to override the default behavior of the event loop
+        # which is to raise a `CancelledError` on SIGINT/SIGTERM
+        # On Windows do nothing, asyncio doesn't do signal handling on Windows
         if sys.platform != "win32":
             stack.enter_context(
                 anyio.open_signal_receiver(signal.SIGINT, signal.SIGTERM)
