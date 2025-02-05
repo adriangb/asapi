@@ -75,11 +75,15 @@ def main() -> None:
         print("Missing required messages in stdout:")
         for msg in missing_messages:
             print(f"- {msg}")
+        print(f"stdout: {stdout}")
+        print(f"stderr: {stderr}")
         sys.exit(1)
 
     # Check return code
     if return_code != 0:
         print(f"Server exited with unexpected return code: {return_code}")
+        print(f"stdout: {stdout}")
+        print(f"stderr: {stderr}")
         sys.exit(1)
 
     print("All tests passed successfully!")
