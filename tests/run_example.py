@@ -13,7 +13,7 @@ SCRIPT_PATH = Path(__file__).parent / "example.py"
 def main() -> None:
     print("Starting server process...")
     server_process = subprocess.Popen(
-        [sys.executable, SCRIPT_PATH, "1011"],
+        [sys.executable, SCRIPT_PATH, "3011"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -25,7 +25,7 @@ def main() -> None:
     try:
         # Send request to the server using httpx
         with httpx.Client() as client:
-            response = client.get("http://localhost:1011/echo/test")
+            response = client.get("http://localhost:3011/echo/test")
             response.raise_for_status()
 
             # Check response
