@@ -36,9 +36,6 @@ def create_app(client: AsyncClient) -> FastAPI:
     return app
 
 
-app = create_app(AsyncClient())
-
-
 async def main() -> None:
     logging.basicConfig(level=logging.INFO)
 
